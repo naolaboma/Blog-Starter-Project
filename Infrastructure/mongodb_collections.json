@@ -1,0 +1,145 @@
+{
+  "database": "blog_db",
+  "collections": {
+    "users": {
+      "description": "User accounts and profiles",
+      "schema": {
+        "_id": "ObjectId",
+        "username": "String (unique, required)",
+        "email": "String (unique, required)",
+        "password": "String (hashed, required)",
+        "role": "String (enum: 'user', 'admin', default: 'user')",
+        "profile_picture": {
+          "filename": "String",
+          "file_path": "String",
+          "public_id": "String",
+          "uploaded_at": "Date"
+        },
+        "bio": "String",
+        "created_at": "Date",
+        "updated_at": "Date"
+      },
+      "indexes": [
+        {"username": 1, "unique": true},
+        {"email": 1, "unique": true},
+        {"role": 1}
+      ]
+    },
+    "blogs": {
+      "description": "Blog posts with embedded comments and reactions",
+      "schema": {
+        "_id": "ObjectId",
+        "title": "String (required)",
+        "content": "String (required)",
+        "author_id": "ObjectId (ref: users._id, required)",
+        "author_username": "String (required, reduces joins)",
+        "tags": ["String"],
+        "view_count": "Number (default: 0)",
+        "like_count": "Number (default: 0)",
+        "comment_count": "Number (default: 0)",
+        "likes": ["String (user IDs)"],
+        "dislikes": ["String (user IDs)"],
+        "comments": [
+          {
+            "_id": "ObjectId",
+            "author_id": "ObjectId (ref: users._id)",
+            "author_username": "String",
+            "content": "String (required)",
+            "created_at": "Date",
+            "updated_at": "Date"
+          }
+        ],
+        "created_at": "Date",
+        "updated_at": "Date"
+      },
+      "indexes": [
+        {"author_id": 1},
+        {"author_username": 1},
+        {"tags": 1},
+        {"created_at": -1},
+        {"view_count": -1},
+        {"title": "text", "content": "text"}
+      ]
+    },
+    "sessions": {
+      "description": "User sessions and tokens",
+      "schema": {
+        "_id": "ObjectId",
+        "username": "String (required)",
+        "refresh_token": "String",
+        "verification_token": "String",
+        "password_reset_token": "String",
+        "reset_code": "Number",
+        "created_at": "Date",
+        "expires_at": "Date"
+      },
+      "indexes": [
+        {"username": 1},
+        {"refresh_token": 1},
+        {"verification_token": 1},
+        {"password_reset_token": 1},
+        {"expires_at": 1}
+      ]
+    },
+    "reactions": {
+      "description": "Unified reaction system for likes/dislikes",
+      "schema": {
+        "_id": "ObjectId",
+        "blog_id": "ObjectId (ref: blogs._id, required)",
+        "user_id": "ObjectId (ref: users._id, required)",
+        "reaction_type": "String (enum: 'like', 'dislike', required)",
+        "created_at": "Date",
+        "updated_at": "Date"
+      },
+      "indexes": [
+        {"blog_id": 1, "user_id": 1, "unique": true},
+        {"blog_id": 1, "reaction_type": 1},
+        {"user_id": 1}
+      ]
+    },
+    "password_reset_tokens": {
+      "description": "Password reset token management",
+      "schema": {
+        "_id": "ObjectId",
+        "user_id": "ObjectId (ref: users._id, required)",
+        "token": "String (unique, required)",
+        "expires_at": "Date (required)",
+        "used": "Boolean (default: false)",
+        "created_at": "Date"
+      },
+      "indexes": [
+        {"user_id": 1},
+        {"token": 1, "unique": true},
+        {"expires_at": 1}
+      ]
+    },
+    "tags": {
+      "description": "Blog tags for categorization",
+      "schema": {
+        "_id": "ObjectId",
+        "name": "String (unique, required)",
+        "created_at": "Date"
+      },
+      "indexes": [
+        {"name": 1, "unique": true}
+      ]
+    }
+  },
+  "features": {
+    "embedded_comments": "Comments are embedded in blog documents for simpler queries",
+    "array_based_reactions": "Likes/dislikes stored as arrays in blog documents",
+    "author_username_redundancy": "Author username stored in blog for reduced joins",
+    "unified_reaction_system": "Separate reactions collection for complex reaction handling",
+    "session_management": "Dedicated sessions collection for token management",
+    "password_reset_system": "Dedicated password reset token collection",
+    "tag_system": "Dedicated tags collection for blog categorization",
+    "text_search": "Text indexes on blog title and content for search functionality",
+    "popularity_tracking": "View count, like count, and comment count fields",
+    "profile_picture_support": "Embedded profile picture structure with file management"
+  },
+  "sample_data": {
+    "users": "Admin user with username 'admin' and email 'admin@example.com'",
+    "blogs": "Welcome blog post with sample content and tags",
+    "tags": "8 sample tags: technology, programming, golang, web-development, database, api, tutorial, best-practices"
+  }
+} 
