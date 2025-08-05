@@ -18,6 +18,12 @@ type User struct {
 	UpdatedAt      time.Time          `bson:"updated_at" json:"updated_at"`
 }
 
+// Constants for user roles to avoid magic strings.
+const (
+	RoleAdmin = "admin"
+	RoleUser  = "user"
+)
+
 type Photo struct {
 	Filename   string    `bson:"filename" json:"filename"`
 	FilePath   string    `bson:"file_path" json:"file_path"`
@@ -69,9 +75,9 @@ type LoginResponse struct {
 }
 
 type UpdateProfileRequest struct {
-	Bio          *string `json:"bio,omitempty"`
-	ProfilePic   *string `json:"profile_pic,omitempty"`
-	ContactInfo  *string `json:"contact_info,omitempty"`
+	Bio         *string `json:"bio,omitempty"`
+	ProfilePic  *string `json:"profile_pic,omitempty"`
+	ContactInfo *string `json:"contact_info,omitempty"`
 }
 
 type RefreshTokenRequest struct {
@@ -84,4 +90,4 @@ type LogoutResponse struct {
 
 type ErrorResponse struct {
 	Error string `json:"error"`
-} 
+}
