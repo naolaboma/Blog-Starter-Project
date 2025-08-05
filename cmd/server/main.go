@@ -32,15 +32,18 @@ func main() {
 	jwtService := jwt.NewJWTService(cfg.JWT.Secret, cfg.JWT.AccessExpiry, cfg.JWT.RefreshExpiry)
 
 	userRepo := repository.NewUserRepository(mongoDB)
+	blogRepo := repository.NewBlogRepository(mongoDB)
 	sessionRepo := repository.NewSessionRepository(mongoDB)
 
 	userUseCase := usecase.NewUserUseCase(userRepo, passwordService, jwtService, sessionRepo)
+	blogUseCase := usecase.NewBlogUseCase(blogRepo, userRepo)
 
 	userHandler := controllers.NewUserHandler(userUseCase)
+	blogHandler := controllers.NewBlogHandler(blogUseCase)
 
 	authMiddleware := middleware.NewAuthMiddleware(jwtService, sessionRepo)
 
-	router := router.SetupRouter(userHandler, authMiddleware)
+	router := router.SetupRouter(userHandler, blogHandler, authMiddleware)
 
 	log.Printf("Server starting on port %s", cfg.Server.Port)
 	log.Printf("MongoDB connected to: %s", cfg.MongoDB.URI)
@@ -49,4 +52,4 @@ func main() {
 	if err := http.ListenAndServe(":"+cfg.Server.Port, router); err != nil {
 		log.Fatal("Failed to start server:", err)
 	}
-} 
+}
